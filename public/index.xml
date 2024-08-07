@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Asif and his blog</title>
+    <link>https://example.org/</link>
+    <description>Recent content on Asif and his blog</description>
+    <generator>Hugo -- 0.131.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 07 Aug 2024 13:03:21 +0600</lastBuildDate>
+    <atom:link href="https://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My First Post</title>
+      <link>https://example.org/posts/my-first-post/</link>
+      <pubDate>Wed, 07 Aug 2024 13:03:21 +0600</pubDate>
+      <guid>https://example.org/posts/my-first-post/</guid>
+      <description>Introduction This is bold text, and this is emphasized text.</description>
+    </item>
+  </channel>
+</rss>
