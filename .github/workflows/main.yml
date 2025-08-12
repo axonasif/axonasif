@@ -1,0 +1,25 @@
+name: Update Submodule
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout quartz repo
+        uses: actions/checkout@v4
+        with:
+          repository: axonasif/quartz
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: quartz
+          
+      - name: Update submodule
+        run: |
+          cd quartz
+          git submodule update --remote --merge
+          git add content
+          git diff --staged --quiet || (git commit -m "Update content submodule to latest commit" && git push)
+        shell: bash
