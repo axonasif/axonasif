@@ -1,26 +1,72 @@
-name: Update Submodule
+name: Update Parent Repository Submodule
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+  push:
+    branches:
+      - main  # Adjust this to match your default branch
+      # You can add more branches if needed
+      # - develop
+      # - feature/*
 
 jobs:
-  update-submodule:
+  update-parent:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout quartz repo
+      # Checkout the submodule repository
+      - name: Checkout submodule repository
         uses: actions/checkout@v4
         with:
-          repository: axonasif/quartz
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: quartz
-          submodules: 'recursive'
-          
-      - name: Update submodule
+          fetch-depth: 0
+      
+      # Get the latest commit hash
+      - name: Get commit hash
+        id: commit
+        run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      
+      # Checkout the parent repository
+      - name: Checkout parent repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/quartz  # Replace with actual parent repo name
+          token: ${{ secrets.GITHUB_TOKEN }}  # Personal Access Token with repo permissions
+          path: parent-repo
+          submodules: true
+      
+      # Configure git
+      - name: Configure git
         run: |
-          cd quartz
-          git submodule update --remote --merge
-          git add content
-          git diff --staged --quiet || (git commit -m "Update content submodule to latest commit" && git push)
-        shell: bash
+          cd parent-repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+      
+      # Update submodule reference
+      - name: Update submodule reference
+        run: |
+          cd parent-repo
+          git submodule update --init --recursive
+          cd content  # Replace with actual submodule path in parent repo
+          git fetch origin
+          git checkout ${{ steps.commit.outputs.hash }}
+          cd ..
+          git add content  # Replace with actual submodule path
+      
+      # Check if there are changes
+      - name: Check for changes
+        id: changes
+        run: |
+          cd parent-repo
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+      
+      # Commit and push if there are changes
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          cd parent-repo
+          git commit -m "Update submodule Boo to ${{ steps.commit.outputs.hash }}"
+          git push origin v4  # Adjust branch name as needed
