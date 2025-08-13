@@ -19,7 +19,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh auth setup-git
-          git clone --recurse-submodules --depth 1 ${{ github.repository_owner }}/quartz
+          git clone --recurse-submodules --depth 1 https://github.com/${{ github.repository_owner }}/quartz
           cd quartz
           git -C content pull
           git add content
