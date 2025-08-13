@@ -14,59 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Checkout the submodule repository
-      - name: Checkout submodule repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      # Get the latest commit hash
-      - name: Get commit hash
-        id: commit
-        run: echo "hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-      
-      # Checkout the parent repository
-      - name: Checkout parent repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/quartz  # Replace with actual parent repo name
-          token: ${{ secrets.QUARTZ_GH_TOKEN }}  # Personal Access Token with repo permissions
-          path: parent-repo
-          submodules: true
-      
-      # Configure git
-      - name: Configure git
+      - name: Script
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          cd parent-repo
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-      
-      # Update submodule reference
-      - name: Update submodule reference
-        run: |
-          cd parent-repo
-          git submodule update --init --recursive
-          cd content  # Replace with actual submodule path in parent repo
-          git fetch origin
-          git checkout ${{ steps.commit.outputs.hash }}
-          cd ..
-          git add content  # Replace with actual submodule path
-      
-      # Check if there are changes
-      - name: Check for changes
-        id: changes
-        run: |
-          cd parent-repo
-          if git diff --cached --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-      
-      # Commit and push if there are changes
-      - name: Commit and push changes
-        if: steps.changes.outputs.changed == 'true'
-        run: |
-          cd parent-repo
-          git commit -m "Update submodule Boo to ${{ steps.commit.outputs.hash }}"
-          git push origin v4  # Adjust branch name as needed
+          gh auth setup-git
+          git clone --recurse-submodules --depth 1 ${{ github.repository_owner }}/quartz
+          cd quartz
+          git -C content pull
+          git add content
+          git commit -m "Update submodule to ${{ github.sha }}"
+          git push origin v4
