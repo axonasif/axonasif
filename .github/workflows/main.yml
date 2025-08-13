@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/quartz  # Replace with actual parent repo name
-          token: ${{ secrets.GITHUB_TOKEN }}  # Personal Access Token with repo permissions
+          token: ${{ secrets.QUARTZ_GH_TOKEN }}  # Personal Access Token with repo permissions
           path: parent-repo
           submodules: true
       
