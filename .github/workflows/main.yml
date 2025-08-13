@@ -15,6 +15,7 @@ jobs:
           repository: axonasif/quartz
           token: ${{ secrets.GITHUB_TOKEN }}
           path: quartz
+          submodules: 'recursive'
           
       - name: Update submodule
         run: |
