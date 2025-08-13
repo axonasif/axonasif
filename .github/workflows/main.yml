@@ -18,7 +18,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh auth setup-git
+          gh auth setup-git --force --hostname github.com
+          gh auth status
           git clone --recurse-submodules --depth 1 https://github.com/${{ github.repository_owner }}/quartz
           cd quartz
           git -C content pull
