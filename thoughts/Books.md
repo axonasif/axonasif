@@ -12,6 +12,8 @@ Book are one of the many but an important medium that shapes my thoughts. Below 
 - [x] 🌟 Atomic Habits
 - [x] The Beginning of Infinity
 - [x] 🌟 Murderbot Diaries (the show is epic too!)
+- [x] Deep Work
+- [x] 🌟 Call Me Maybe (Romance 😛)
 - [ ] Animal farm
 - [ ] Robert greene books
 - [ ] [Meditations](https://g.co/kgs/hz7k5Es) 
