@@ -13,6 +13,8 @@ Book are one of the many but an important medium that shapes my thoughts. I star
 - The Beginning of Infinity
 - 🌟 Murderbot Diaries (the show is epic too!)
 - Deep Work
+- 🌟 Can't Hurt Me
+- The Creative Act: A Way of Being
 - 🌟 Call Me Maybe (Romance ✨)
 - 🌟 Drop Dead (Romance ✨)
 - Rich Dad Poor Dad
