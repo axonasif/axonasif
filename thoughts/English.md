@@ -1,0 +1,7 @@
+---
+title: English
+date: 2025-10-14
+tags:
+  - seed
+---
+Yes, English is not my first language. I don't know why I was destined to learn this language, and I'm absolutely not fluent at it. It takes a lot of brain cells for me to produce something meaningful. I guess it's one of the things that happens when you are somewhat privileged to learn it and also not so privileged. It is difficult for me to speak this language and understand it and to produce a delightful sentence that you could read and feel like "wow that sounds great". The irony is, this is good enough probably to get by. I just don't really have the adequate capacity to express my thoughts articulately, just yet. You wanna know what's even more ironic? I probably suck to express my thoughts even in my own native language. It's really funny. Because sometimes I feel like I can express my thoughts articulately if I do it in English, and the other times I feel like I could do it better in my native language, Bangla. I'm in such a weird position, I don't know how to describe it. However, I believe I can improve a lot more if I continue practicing at being more coherent and squashing up knowledge somehow. Once someone told me that I'm really good at learning or memorizing something like a sponge as if I'm soaking up everything, which is a funny anecdote, I guess.
