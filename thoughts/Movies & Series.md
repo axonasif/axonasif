@@ -4,7 +4,7 @@ date: 2025-10-06
 tags:
   - seed
 ---
-Here's a list of movies & series that I loved watching and would watch again, in no particular order:
+Here's a list of movies & series that I loved watching and would watch again, in no particular order.
 - Interstellar 2014
 - Murderbot (Apple TV)
 - Relay 2024
