@@ -7,6 +7,9 @@ tags:
 ---
 Let's do a fun experiment! Let's see if I can track my mood everyday. Here goes nothing! 
 
+# Thursday, October 30, 2025
+
+Today is a mess! Woke up really late, struggled to sleep at night, but still trying my best. 
 # Friday, October 31, 2025
 
-Feeling overwhelmed, struggling to focus, just want to do nothing.
+Feeling overwhelmed, struggling to focus, just want to do nothing but I have to push it through.
