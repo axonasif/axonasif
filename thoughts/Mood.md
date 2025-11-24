@@ -13,3 +13,8 @@ Today is a mess! Woke up really late, struggled to sleep at night, but still try
 # Friday, October 31, 2025
 
 Feeling overwhelmed, struggling to focus, just want to do nothing but I have to push it through.
+
+
+# TODO
+
+I realize manual entry wont work. Let me plug in my MissionLog™️ video transcript on here.
