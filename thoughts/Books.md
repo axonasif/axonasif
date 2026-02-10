@@ -21,6 +21,7 @@ Book are one of the many but an important medium that shapes my thoughts. I star
 - 🌟 The Terminal List
 - All Dead by T.W Brown
 - The Mountain Is You
+- 🌟 Children of Time
 
 ## Wish list
 - [ ] The Hitchhiker's Guide to the Galaxy
