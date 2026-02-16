@@ -1,5 +1,5 @@
 ---
-title: vivaldi-managed-policies-macos
+title: Vivaldi (Chromium) managed policies on MacOS
 date: 2026-02-16
 tags:
   - seed
