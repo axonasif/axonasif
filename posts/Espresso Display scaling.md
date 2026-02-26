@@ -3,6 +3,8 @@ title: Espresso Display scaling
 date: 2026-02-26
 tags:
   - seed
+  - display
+  - guide
 ---
 How I enabled scaling on my espresso display. MacOS settings doesn't list the HiDPI/scaling enabled resolutions for some reason but it's actually supported (screenshot 1). Here's how!  
 
