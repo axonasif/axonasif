@@ -30,3 +30,4 @@ Book are one of the many but an important medium that shapes my thoughts. I star
 - [ ] [Meditations](https://g.co/kgs/hz7k5Es) 
 - [ ] [Winnie-the-Pooh (book) - Google Search](https://g.co/kgs/xqXKX9c)
 - [ ] Markus Aurelius books
+- [ ] Salt: A World History
