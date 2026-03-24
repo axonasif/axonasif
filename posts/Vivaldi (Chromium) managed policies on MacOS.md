@@ -7,13 +7,171 @@ tags:
 ---
 # Locking Down Vivaldi Settings on macOS with Managed Policies
 
-You can use macOS managed preferences (the same mechanism used for enterprise/MDM deployments) on a personal Mac to lock Vivaldi browser settings — preventing changes to DNS-over-HTTPS configuration and force-installing extensions that can't be removed.
+On macOS, the reliable way to enforce Vivaldi managed policies on a personal machine is **not** to drop a plist into `/Library/Managed Preferences/` by hand. That can appear to work briefly, but macOS may remove those preferences after a reboot if they are not backed by a real configuration profile.
+
+The durable approach is to install a `.mobileconfig` profile whose payload type matches Vivaldi's bundle identifier: `com.vivaldi.Vivaldi`.
+
+## The Important Discovery
+
+If you manually place `com.vivaldi.Vivaldi.plist` in `/Library/Managed Preferences/` on a non-MDM personal Mac, Vivaldi can read it at first, but macOS may later clean it up as an orphaned managed preference.
+
+That means:
+- the browser may show the setting as managed temporarily
+- the policy can disappear after restart
+- the setup is not trustworthy for long-term enforcement
+
+So if your goal is persistent browser lockdown, use a configuration profile.
 
 ## How It Works
 
-Chromium-based browsers (including Vivaldi) read policy files from `/Library/Managed Preferences/`. When a policy is set there, the corresponding setting in the browser UI becomes grayed out and shows "managed by your organization." Since the plist file is owned by root, it can't be modified without `sudo`.
+Chromium-based browsers such as Vivaldi read managed policy values via macOS managed preferences. When those values are delivered by a configuration profile:
+- the settings persist across reboots
+- the corresponding UI in Vivaldi becomes grayed out
+- `vivaldi://policy` shows them as platform-managed policies
 
-## Creating the Policy File
+The key detail is that the profile payload uses Vivaldi's bundle ID as its `PayloadType`:
+
+```xml
+<key>PayloadType</key>
+<string>com.vivaldi.Vivaldi</string>
+```
+
+## Create the Configuration Profile
+
+Save a file such as `vivaldi-policy.mobileconfig` with contents like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.vivaldi.Vivaldi</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.vivaldi.Vivaldi.policy</string>
+            <key>PayloadUUID</key>
+            <string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+
+            <key>DnsOverHttpsMode</key>
+            <string>secure</string>
+
+            <key>DnsOverHttpsTemplates</key>
+            <string>https://your-doh-provider.example/dns-query</string>
+
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>EXTENSION_ID_1;https://clients2.google.com/service/update2/crx</string>
+                <string>EXTENSION_ID_2;https://clients2.google.com/service/update2/crx</string>
+            </array>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>Vivaldi Browser Policy</string>
+    <key>PayloadIdentifier</key>
+    <string>com.vivaldi.policy.profile</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>B2C3D4E5-F6A7-8901-BCDE-F12345678901</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>
+```
+
+Replace these values before installing:
+- `https://your-doh-provider.example/dns-query` with your DoH endpoint
+- `EXTENSION_ID_1`, `EXTENSION_ID_2`, etc. with real Chrome Web Store extension IDs
+- the example UUIDs with your own if you want a cleaner long-term profile identity
+
+## Install the Profile
+
+Open the file:
+
+```bash
+open vivaldi-policy.mobileconfig
+```
+
+Then approve it in:
+
+**System Settings -> Privacy & Security -> Profiles**
+
+Once installed, macOS treats the policy as legitimate managed configuration instead of an orphaned plist.
+
+If Vivaldi does not immediately reflect the profile after installation or after a profile change, flush the macOS preferences cache and then restart Vivaldi:
+
+```bash
+sudo killall cfprefsd
+```
+
+## Policy Reference
+
+**DnsOverHttpsMode** options:
+- `secure` - only use DoH, fail if unavailable
+- `automatic` - try DoH first, fall back to plain DNS
+- `off` - disable DoH
+
+**ExtensionInstallForcelist** format:
+- each entry is `EXTENSION_ID;UPDATE_URL`
+- for Chrome Web Store extensions, the update URL is `https://clients2.google.com/service/update2/crx`
+
+## Verifying
+
+Check that the profile is installed:
+
+```bash
+sudo profiles list
+```
+
+Then verify inside Vivaldi:
+- `vivaldi://policy` - policies should show Source: **Platform**, Level: **Mandatory**, Status: **OK**
+- `vivaldi://extensions` - force-installed extensions should appear managed with no remove button
+- Vivaldi's DNS-over-HTTPS setting should be grayed out
+
+## Updating the Policy Later
+
+Edit the `.mobileconfig` file, then remove and reinstall the profile so macOS picks up the new payload cleanly.
+
+If you are iterating on values, treat the profile file as the source of truth rather than trying to patch `/Library/Managed Preferences/` directly.
+
+After reinstalling or changing the profile, it is still worth flushing the preferences cache before reopening Vivaldi:
+
+```bash
+sudo killall cfprefsd
+```
+
+## Removing the Policy
+
+Go to:
+
+**System Settings -> Privacy & Security -> Profiles**
+
+Select **Vivaldi Browser Policy** and remove it.
+
+If Vivaldi still shows stale policy state immediately afterwards, run:
+
+```bash
+sudo killall cfprefsd
+```
+
+## Gotchas
+
+- **Do not rely on a hand-written plist in `/Library/Managed Preferences/` for persistence.** It may work temporarily, then disappear after reboot.
+- **The payload must target `com.vivaldi.Vivaldi`.** That is what Vivaldi reads as its managed preferences domain.
+- **`vivaldi://policy` is your source of truth.** If the browser does not show the policy there, macOS delivery is not set up correctly.
+- **A configuration profile beats manual filesystem tricks.** The problem is not just file ownership or plist syntax; it is that macOS wants managed preferences to come from a real profile authority.
+- **`cfprefsd` caching still matters.** Even with the correct profile in place, macOS can serve stale preference data until you run `sudo killall cfprefsd`.
+
+## Old Manual Plist Method
+
+The older direct-plist approach is still useful as a reference and can help for short-lived testing, but it should not be treated as persistent on a personal non-MDM Mac.
+
+### Creating the Policy File Manually
 
 Write the plist directly using `sudo tee`:
 
@@ -40,16 +198,16 @@ sudo tee /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist << 'EOF'
 EOF
 ```
 
-Replace `EXTENSION_ID_1`, `EXTENSION_ID_2`, etc. with the actual extension IDs from their Chrome Web Store URLs, and replace the DoH template URL with your provider.
+Replace `EXTENSION_ID_1`, `EXTENSION_ID_2`, and the DoH template URL with your real values.
 
-Set proper ownership:
+Set ownership and permissions:
 
 ```bash
 sudo chown root:wheel /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist
 sudo chmod 644 /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist
 ```
 
-Then **flush the preferences cache** — this is the key step that makes changes take effect:
+Then flush the preferences cache:
 
 ```bash
 sudo killall cfprefsd
@@ -57,18 +215,9 @@ sudo killall cfprefsd
 
 Restart Vivaldi and verify at `vivaldi://policy`.
 
-## Policy Reference
+### Modifying the Manual Plist Later
 
-**DnsOverHttpsMode** options:
-- `secure` — only use DoH, fail if unavailable
-- `automatic` — try DoH first, fall back to plain DNS
-- `off` — disable DoH
-
-**ExtensionInstallForcelist** format: each entry is `EXTENSION_ID;UPDATE_URL`. The update URL for Chrome Web Store extensions is always `https://clients2.google.com/service/update2/crx`. You can find the extension ID in its Chrome Web Store URL.
-
-## Modifying the Policy Later
-
-To surgically update a single key (e.g. adding extensions) without rewriting the whole file, use `plutil -replace`:
+To surgically update a single key without rewriting the whole file, use `plutil -replace`:
 
 ```bash
 sudo plutil -replace ExtensionInstallForcelist -json '[
@@ -78,26 +227,25 @@ sudo plutil -replace ExtensionInstallForcelist -json '[
 ]' /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist
 ```
 
-Always run `sudo killall cfprefsd` afterwards, then restart Vivaldi.
+Always run this afterwards:
 
-## Verifying
+```bash
+sudo killall cfprefsd
+```
 
-- `vivaldi://policy` — all policies should show Source: **Platform**, Level: **Mandatory**, Status: **OK**
-- `vivaldi://extensions` — force-installed extensions show as managed with no remove button
-- DoH setting in Vivaldi's privacy settings should be grayed out
+### Reading or Removing the Manual Plist
 
-## Removing the Policy
+Read the current state:
+
+```bash
+sudo plutil -p /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist
+```
+
+Remove it:
 
 ```bash
 sudo rm /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist
 sudo killall cfprefsd
 ```
 
-Restart Vivaldi.
-
-## Gotchas
-
-- **Don't use `defaults write`** for this — it's unreliable with managed preferences paths and can silently write to the wrong location.
-- **Always run `sudo killall cfprefsd`** after any changes. macOS aggressively caches preferences, and without this, Vivaldi may see stale values even after a restart.
-- **Binary conversion is optional** — XML plists work fine. You can convert with `sudo plutil -convert binary1 <path>` if you prefer.
-- **Read the current state** anytime with `sudo plutil -p /Library/Managed\ Preferences/com.vivaldi.Vivaldi.plist`.
+Again, the key limitation of this method is persistence: macOS may clean up the file after restart if no backing configuration profile exists.
